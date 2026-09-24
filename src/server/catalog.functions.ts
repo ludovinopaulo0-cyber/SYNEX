@@ -13,11 +13,15 @@ const productInput = z.object({
   subcategory: z.string().min(1).max(60),
   name: z.string().min(1).max(120),
   price: z.number().int().min(0).max(100_000_000),
+  discountPrice: z.number().int().min(0).max(100_000_000).nullable(),
   imageData: z.string().max(3_000_000).nullable(),
   platform: z.string().max(80).nullable(),
   region: z.string().max(80).nullable(),
   type: z.string().max(80).nullable(),
   available: z.boolean(),
+}).refine((data) => data.discountPrice === null || data.discountPrice < data.price, {
+  message: 'O preço com desconto tem de ser menor que o preço normal.',
+  path: ['discountPrice'],
 })
 
 const authed = z.object({ token: z.string().min(1) })

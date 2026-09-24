@@ -45,7 +45,10 @@ export function ProductCard({
   onOrder: (product: Product) => void
   index?: number
 }) {
-  const price = formatKzParts(product.price)
+  const hasDiscount =
+    product.discountPrice !== null && product.discountPrice < product.price
+  const price = formatKzParts(hasDiscount ? product.discountPrice! : product.price)
+  const originalPrice = hasDiscount ? formatKzParts(product.price) : null
   const meta = [product.region, product.platform, product.type].filter(Boolean)
 
   return (
@@ -55,6 +58,11 @@ export function ProductCard({
     >
       <div className="relative aspect-square overflow-hidden border-b border-hairline">
         <ProductArtwork product={product} />
+        {hasDiscount && product.available && (
+          <span className="absolute left-0 top-3 bg-violet px-2.5 py-1 font-display text-[0.6rem] font-bold uppercase tracking-[0.2em] text-paper">
+            Promoção
+          </span>
+        )}
         {!product.available && (
           <span className="absolute left-0 top-3 bg-paper px-2.5 py-1 font-display text-[0.6rem] font-bold uppercase tracking-[0.2em] text-ink">
             Esgotado
@@ -74,14 +82,21 @@ export function ProductCard({
           )}
         </div>
 
-        <p className="flex items-baseline gap-1.5">
-          <span className="font-display text-[1.35rem] font-bold leading-none text-paper">
-            {price.amount}
-          </span>
-          <span className="font-display text-[0.7rem] font-medium tracking-[0.14em] text-lilac">
-            {price.currency}
-          </span>
-        </p>
+        <div className="space-y-0.5">
+          {originalPrice && (
+            <p className="font-display text-[0.72rem] font-medium text-muted line-through decoration-muted/70">
+              {originalPrice.amount} {originalPrice.currency}
+            </p>
+          )}
+          <p className="flex items-baseline gap-1.5">
+            <span className="font-display text-[1.35rem] font-bold leading-none text-paper">
+              {price.amount}
+            </span>
+            <span className="font-display text-[0.7rem] font-medium tracking-[0.14em] text-lilac">
+              {price.currency}
+            </span>
+          </p>
+        </div>
 
         <button
           type="button"

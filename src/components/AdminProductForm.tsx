@@ -15,6 +15,7 @@ const EMPTY: ProductInput = {
   subcategory: 'playstation',
   name: '',
   price: 0,
+  discountPrice: null,
   imageData: null,
   platform: '',
   region: '',
@@ -28,6 +29,7 @@ function toInput(product: Product): ProductInput {
     subcategory: product.subcategory,
     name: product.name,
     price: product.price,
+    discountPrice: product.discountPrice,
     imageData: product.imageData,
     platform: product.platform ?? '',
     region: product.region ?? '',
@@ -194,6 +196,37 @@ export function AdminProductForm({
             value={form.price}
             onChange={(event) => patch({ price: Number(event.target.value) || 0 })}
           />
+        </div>
+
+        <div>
+          <label className="field-label">Preço com desconto (Kz, opcional)</label>
+          <div className="flex items-center gap-2">
+            <input
+              className="field font-display"
+              type="number"
+              min={0}
+              placeholder="Sem desconto"
+              value={form.discountPrice ?? ''}
+              onChange={(event) => {
+                const raw = event.target.value
+                patch({ discountPrice: raw === '' ? null : Number(raw) || 0 })
+              }}
+            />
+            {form.discountPrice !== null && (
+              <button
+                type="button"
+                onClick={() => patch({ discountPrice: null })}
+                className="shrink-0 font-display text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-muted hover:text-lilac"
+              >
+                Remover
+              </button>
+            )}
+          </div>
+          {form.discountPrice !== null && form.discountPrice >= form.price && (
+            <p className="mt-1 text-[0.66rem] text-amber-400">
+              Tem de ser menor que o preço normal.
+            </p>
+          )}
         </div>
 
         <button

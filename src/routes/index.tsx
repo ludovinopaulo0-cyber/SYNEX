@@ -20,7 +20,7 @@ import { AdminProductForm } from '@/components/AdminProductForm'
 import { Logo, Wordmark } from '@/components/Logo'
 import { ProductCard } from '@/components/ProductCard'
 import { CATEGORIES, categoryLabel, subcategoryLabel } from '@/data/catalog'
-import { BRAND, orderMessage } from '@/lib/brand'
+import { BRAND, orderMessage, whatsappLink } from '@/lib/brand'
 import { useAdmin } from '@/lib/useAdmin'
 import { getProducts } from '@/server/catalog.functions'
 import type { Product } from '@/lib/types'
@@ -95,15 +95,8 @@ function Home() {
     })
   }, [products, query, category, subcategory, searching])
 
-  const order = async (product: Product) => {
-    const message = orderMessage(product)
-    try {
-      await navigator.clipboard.writeText(message)
-      setToast('Mensagem copiada. Cola no DM e envia.')
-    } catch {
-      setToast('Abre o DM e diz-nos qual o produto que queres.')
-    }
-    window.open(BRAND.instagramDm, '_blank', 'noopener,noreferrer')
+  const order = (product: Product) => {
+    window.open(whatsappLink(orderMessage(product)), '_blank', 'noopener,noreferrer')
   }
 
   const upsert = (saved: Product) =>
@@ -126,15 +119,26 @@ function Home() {
             <Logo size={38} />
             <Wordmark />
           </div>
-          <a
-            href={BRAND.instagramProfile}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 border border-hairline px-3 py-1.5 font-display text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted transition-colors hover:border-lilac/50 hover:text-paper"
-          >
-            <Instagram className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">@{BRAND.instagramHandle}</span>
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={whatsappLink('Olá! Vim através do site da SYNEX.')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 border border-hairline px-3 py-1.5 font-display text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted transition-colors hover:border-lilac/50 hover:text-paper"
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+            <a
+              href={BRAND.instagramProfile}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 border border-hairline px-3 py-1.5 font-display text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted transition-colors hover:border-lilac/50 hover:text-paper"
+            >
+              <Instagram className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">@{BRAND.instagramHandle}</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -207,12 +211,12 @@ function Home() {
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </a>
               <a
-                href={BRAND.instagramDm}
+                href={whatsappLink('Olá! Vim através do site da SYNEX.')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 border border-hairline px-6 py-3 font-display text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-muted transition-colors hover:border-lilac/60 hover:text-paper"
               >
-                <Instagram className="h-3.5 w-3.5" />
+                <MessageCircle className="h-3.5 w-3.5" />
                 Fala connosco
               </a>
             </div>
@@ -357,16 +361,16 @@ function Home() {
               Sem resultados
             </p>
             <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-muted">
-              Não temos nada com esse nome à vista. Pede pelo DM — muita coisa
-              entra por encomenda.
+              Não temos nada com esse nome à vista. Pede pelo WhatsApp — muita
+              coisa entra por encomenda.
             </p>
             <a
-              href={BRAND.instagramDm}
+              href={whatsappLink('Olá! Procuro um produto que não vi no catálogo da SYNEX.')}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 inline-flex items-center gap-2 border border-violet bg-violet/25 px-5 py-2.5 font-display text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-paper transition-colors hover:bg-violet/45"
             >
-              <Instagram className="h-3.5 w-3.5" /> Pedir no Instagram
+              <MessageCircle className="h-3.5 w-3.5" /> Pedir no WhatsApp
             </a>
           </div>
         )}
@@ -383,8 +387,8 @@ function Home() {
             },
             {
               step: '02',
-              title: 'Fala pelo Instagram',
-              body: 'O botão Encomendar copia os dados do produto e abre o nosso DM. Combinamos o pagamento aí.',
+              title: 'Fala pelo WhatsApp',
+              body: 'O botão Encomendar abre o WhatsApp com os dados do produto já preenchidos. Combinamos o pagamento por lá.',
             },
             {
               step: '03',
@@ -421,6 +425,14 @@ function Home() {
           </div>
 
           <div className="flex items-center gap-5">
+            <a
+              href={whatsappLink('Olá! Vim através do site da SYNEX.')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.16em] text-muted transition-colors hover:text-paper"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+            </a>
             <a
               href={BRAND.instagramProfile}
               target="_blank"

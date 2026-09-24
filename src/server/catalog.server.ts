@@ -13,6 +13,7 @@ function toProduct(row: Row): Product {
     subcategory: row.subcategory,
     name: row.name,
     price: row.price,
+    discountPrice: row.discountPrice,
     imageData: row.imageData,
     platform: row.platform,
     region: row.region,
@@ -54,7 +55,7 @@ export async function listProducts(): Promise<Array<Product>> {
   const rows = await db
     .select()
     .from(products)
-    .orderBy(asc(products.position), asc(products.id))
+    .orderBy(asc(products.name))
   return rows.map(toProduct)
 }
 
@@ -66,6 +67,7 @@ export async function insertProduct(input: ProductInput): Promise<Product> {
       subcategory: input.subcategory,
       name: input.name,
       price: input.price,
+      discountPrice: input.discountPrice,
       imageData: input.imageData,
       platform: input.platform,
       region: input.region,
@@ -88,6 +90,7 @@ export async function saveProduct(
       subcategory: input.subcategory,
       name: input.name,
       price: input.price,
+      discountPrice: input.discountPrice,
       imageData: input.imageData,
       platform: input.platform,
       region: input.region,
