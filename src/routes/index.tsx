@@ -17,6 +17,7 @@ import {
 import { AdminDialog } from '@/components/AdminDialog'
 import type { AdminDialogMode } from '@/components/AdminDialog'
 import { AdminProductForm } from '@/components/AdminProductForm'
+import { SupplierPanel } from '@/components/SupplierPanel'
 import { Logo, Wordmark } from '@/components/Logo'
 import { ProductCard } from '@/components/ProductCard'
 import { CATEGORIES, categoryLabel, subcategoryLabel } from '@/data/catalog'
@@ -46,6 +47,7 @@ function Home() {
   const [category, setCategory] = useState('all')
   const [subcategory, setSubcategory] = useState<string | null>(null)
   const [dialog, setDialog] = useState<AdminDialogMode | null>(null)
+  const [supplierOpen, setSupplierOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const admin = useAdmin()
@@ -466,6 +468,13 @@ function Home() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                onClick={() => setSupplierOpen(true)}
+                className="border border-hairline px-3 py-1.5 font-display text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-muted transition-colors hover:text-paper"
+              >
+                Fornecedor
+              </button>
+              <button
+                type="button"
                 onClick={() => setDialog('change')}
                 className="border border-hairline px-3 py-1.5 font-display text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-muted transition-colors hover:text-paper"
               >
@@ -491,6 +500,10 @@ function Home() {
           onSetup={admin.setup}
           onChange={admin.changePin}
         />
+      )}
+
+      {supplierOpen && admin.token && (
+        <SupplierPanel token={admin.token} onClose={() => setSupplierOpen(false)} />
       )}
 
       {toast && (
