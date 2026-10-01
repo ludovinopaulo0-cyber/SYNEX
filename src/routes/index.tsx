@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   ArrowRight,
@@ -21,6 +21,7 @@ import { SupplierPanel } from '@/components/SupplierPanel'
 import { Logo, Wordmark } from '@/components/Logo'
 import { ProductCard } from '@/components/ProductCard'
 import { CATEGORIES, categoryLabel, subcategoryLabel } from '@/data/catalog'
+import { formatKzParts } from '@/lib/format'
 import { BRAND, orderMessage, whatsappLink } from '@/lib/brand'
 import { useAdmin } from '@/lib/useAdmin'
 import { getProducts } from '@/server/catalog.functions'
@@ -50,6 +51,8 @@ function Home() {
   const [supplierOpen, setSupplierOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [highlightId, setHighlightId] = useState<number | null>(null)
+  const appliedSharedLink = useRef(false)
   const admin = useAdmin()
 
   useEffect(() => setProducts(initial), [initial])
@@ -100,6 +103,61 @@ function Home() {
   const order = (product: Product) => {
     window.open(whatsappLink(orderMessage(product)), '_blank', 'noopener,noreferrer')
   }
+
+  function productUrl(product: Product) {
+    const url = new URL(window.location.href)
+    url.search = ''
+    url.searchParams.set('p', String(product.id))
+    return url.toString()
+  }
+
+  async function share(product: Product) {
+    const url = productUrl(product)
+    const text = `${product.name} — ${formatKzParts(
+      product.discountPrice ?? product.price,
+    ).amount} Kz na SYNEX DIGITAL`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product.name, text, url })
+        return
+      } catch {
+        // partilha cancelada pelo utilizador ou indisponível — tenta copiar a seguir
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url)
+      setToast('Link copiado. Cola onde quiseres partilhar.')
+    } catch {
+      setToast(url)
+    }
+  }
+
+  // Abre diretamente num produto quando o link partilhado (?p=id) é usado.
+  useEffect(() => {
+    if (appliedSharedLink.current) return
+    if (products.length === 0) return
+    const params = new URLSearchParams(window.location.search)
+    const sharedId = params.get('p')
+    if (!sharedId) return
+
+    const target = products.find((p) => String(p.id) === sharedId)
+    if (!target) return
+
+    appliedSharedLink.current = true
+    setQuery('')
+    setCategory(target.category)
+    setSubcategory(target.subcategory)
+    setHighlightId(target.id)
+
+    window.setTimeout(() => {
+      document
+        .getElementById(`product-${target.id}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 80)
+    window.setTimeout(() => setHighlightId(null), 2600)
+  }, [products])
 
   const upsert = (saved: Product) =>
     setProducts((current) =>
@@ -349,8 +407,16 @@ function Home() {
                 }
               />
             ) : (
-              <div key={product.id} className="rise">
-                <ProductCard product={product} onOrder={order} index={index} />
+              <div
+                key={product.id}
+                id={`product-${product.id}`}
+                className={`rise transition-shadow duration-500 ${
+                  highlightId === product.id
+                    ? 'rounded-[2px] ring-2 ring-lilac shadow-[0_0_0_4px_rgba(192,132,252,0.18)]'
+                    : ''
+                }`}
+              >
+                <ProductCard product={product} onOrder={order} onShare={share} index={index} />
               </div>
             ),
           )}

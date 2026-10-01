@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Share2 } from 'lucide-react'
 import { subcategoryIcon } from './SubcategoryIcon'
 import { subcategoryLabel } from '@/data/catalog'
 import { formatKzParts } from '@/lib/format'
@@ -39,10 +39,12 @@ export function ProductArtwork({ product }: { product: Product }) {
 export function ProductCard({
   product,
   onOrder,
+  onShare,
   index = 0,
 }: {
   product: Product
   onOrder: (product: Product) => void
+  onShare: (product: Product) => void
   index?: number
 }) {
   const hasDiscount =
@@ -68,6 +70,18 @@ export function ProductCard({
             Esgotado
           </span>
         )}
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            onShare(product)
+          }}
+          aria-label="Partilhar produto"
+          title="Partilhar"
+          className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center border border-hairline bg-ink/70 text-muted backdrop-blur-sm transition-colors hover:border-lilac/60 hover:text-paper"
+        >
+          <Share2 className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
