@@ -4,12 +4,14 @@ import {
   ArrowRight,
   Check,
   Instagram,
+  Landmark,
   Lock,
   LogOut,
   MessageCircle,
   Plus,
   Search,
   ShieldCheck,
+  Smartphone,
   Wallet,
   X,
   Zap,
@@ -476,6 +478,41 @@ function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ---------------- Métodos de pagamento ---------------- */}
+      <section className="border-t border-hairline">
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-paper">
+            Formas de pagamento
+          </h2>
+          <p className="mt-2 max-w-md text-xs leading-relaxed text-muted">
+            Combinamos o pagamento diretamente na conversa do WhatsApp, depois de
+            confirmares o pedido.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:max-w-xl">
+            <div className="flex items-center gap-3 border border-violet/60 bg-violet/10 px-4 py-3.5">
+              <Smartphone className="h-5 w-5 shrink-0 text-lilac" />
+              <div>
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-paper">
+                  Multicaixa Express
+                </p>
+                <p className="text-[0.68rem] text-lilac">Preferencial — confirmação mais rápida</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 border border-hairline bg-ink-raised/40 px-4 py-3.5">
+              <Landmark className="h-5 w-5 shrink-0 text-muted" />
+              <div>
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-paper">
+                  Transferência bancária
+                </p>
+                <p className="text-[0.68rem] text-muted">Dados enviados no WhatsApp</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
