@@ -3,15 +3,18 @@ import { createFileRoute } from '@tanstack/react-router'
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   Instagram,
   Landmark,
   Lock,
   LogOut,
   MessageCircle,
   Plus,
+  Quote,
   Search,
   ShieldCheck,
   Smartphone,
+  Star,
   Wallet,
   X,
   Zap,
@@ -54,6 +57,7 @@ function Home() {
   const [creating, setCreating] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [highlightId, setHighlightId] = useState<number | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
   const appliedSharedLink = useRef(false)
   const admin = useAdmin()
 
@@ -446,6 +450,49 @@ function Home() {
         )}
       </section>
 
+      {/* ---------------- Prova social ---------------- */}
+      <section className="border-t border-hairline bg-ink-deep/60">
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-paper">
+            O que dizem os clientes
+          </h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                name: 'Jérsson M.',
+                text: 'Pedi a PSN à noite e já estava a jogar 10 minutos depois. Super rápido.',
+              },
+              {
+                name: 'Ivânia S.',
+                text: 'Comprei Robux para o meu filho, o código veio certo e o atendimento foi muito simpático.',
+              },
+              {
+                name: 'Paulo K.',
+                text: 'Já fiz várias encomendas, nunca tive problema nenhum. Recomendo.',
+              },
+            ].map((item) => (
+              <div
+                key={item.name}
+                className="cut-panel border border-hairline bg-ink-raised/40 p-5"
+              >
+                <Quote className="h-4 w-4 text-violet/70" />
+                <p className="mt-3 text-xs leading-relaxed text-muted">“{item.text}”</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-paper">
+                    {item.name}
+                  </p>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3 w-3 fill-lilac text-lilac" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ---------------- Como funciona ---------------- */}
       <section className="border-t border-hairline bg-ink-deep/60">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-14 sm:grid-cols-3">
@@ -512,6 +559,59 @@ function Home() {
                 <p className="text-[0.68rem] text-muted">Dados enviados no WhatsApp</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- FAQ ---------------- */}
+      <section className="border-t border-hairline bg-ink-deep/60">
+        <div className="mx-auto max-w-3xl px-5 py-14">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-paper">
+            Perguntas frequentes
+          </h2>
+          <div className="mt-6 divide-y divide-hairline border-y border-hairline">
+            {[
+              {
+                q: 'Quanto tempo demora a entrega?',
+                a: 'É tudo digital: normalmente entregamos o código ou os dados em poucos minutos depois de confirmado o pagamento, pela mesma conversa de WhatsApp.',
+              },
+              {
+                q: 'Como resgato o código que recebo?',
+                a: 'Depende do produto (PSN, Robux, Netflix, etc.) — enviamos sempre o passo a passo específico junto com o código, para não haver dúvidas.',
+              },
+              {
+                q: 'Que formas de pagamento aceitam?',
+                a: 'Multicaixa Express (preferencial, confirmação mais rápida) e transferência bancária. Os dados são enviados na conversa do WhatsApp.',
+              },
+              {
+                q: 'E se o código não funcionar?',
+                a: 'Resolvemos contigo diretamente pelo WhatsApp — confirmamos o problema e substituímos ou reembolsamos conforme o caso.',
+              },
+              {
+                q: 'É seguro comprar aqui?',
+                a: 'Sim. Trabalhamos com fornecedores verificados e todo o histórico de pedidos fica registado — não é uma venda anónima.',
+              },
+            ].map((item, i) => (
+              <div key={item.q}>
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full items-center justify-between gap-4 py-4 text-left"
+                >
+                  <span className="font-display text-xs font-semibold uppercase tracking-[0.08em] text-paper">
+                    {item.q}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 ${
+                      openFaq === i ? 'rotate-180 text-lilac' : ''
+                    }`}
+                  />
+                </button>
+                {openFaq === i && (
+                  <p className="pb-4 text-xs leading-relaxed text-muted">{item.a}</p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -608,6 +708,16 @@ function Home() {
       {supplierOpen && admin.token && (
         <SupplierPanel token={admin.token} onClose={() => setSupplierOpen(false)} />
       )}
+
+      <a
+        href={whatsappLink('Olá! Vim através do site da SYNEX.')}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-violet text-paper shadow-[0_14px_30px_-10px_rgba(124,58,237,0.8)] transition-transform hover:scale-105"
+      >
+        <MessageCircle className="h-5 w-5" />
+      </a>
 
       {toast && (
         <div className="panel-in fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 border border-lilac/40 bg-ink-deep/95 px-4 py-3 text-xs text-paper shadow-[0_18px_40px_-18px_rgba(124,58,237,0.7)] backdrop-blur-md">
