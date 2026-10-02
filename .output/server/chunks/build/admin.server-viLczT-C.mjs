@@ -11577,6 +11577,7 @@ const products = pgTable(
     subcategory: text().notNull(),
     name: text().notNull(),
     price: integer().notNull(),
+    discountPrice: integer("discount_price"),
     imageData: text("image_data"),
     platform: text(),
     region: text(),

@@ -2735,11 +2735,15 @@ const productInput = object({
   subcategory: string().min(1).max(60),
   name: string().min(1).max(120),
   price: number().int().min(0).max(1e8),
+  discountPrice: number().int().min(0).max(1e8).nullable(),
   imageData: string().max(3e6).nullable(),
   platform: string().max(80).nullable(),
   region: string().max(80).nullable(),
   type: string().max(80).nullable(),
   available: boolean()
+}).refine((data) => data.discountPrice === null || data.discountPrice < data.price, {
+  message: "O preço com desconto tem de ser menor que o preço normal.",
+  path: ["discountPrice"]
 });
 const authed = object({
   token: string().min(1)
@@ -2761,7 +2765,7 @@ const deleteProduct = createServerFn({
 }).inputValidator(authed.extend({
   id: number().int().positive()
 })).handler(createSsrRpc("35586c93f576b785717858c6debd5be24342826aa5654386336199524e160b8d"));
-const $$splitComponentImporter = () => import("./index-7uWbUz_1.mjs");
+const $$splitComponentImporter = () => import("./index-W3kTrUNn.mjs");
 const Route2 = createFileRoute("/")({
   loader: async () => ({
     products: await getProducts()

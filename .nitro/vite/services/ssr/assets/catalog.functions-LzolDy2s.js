@@ -1,7 +1,7 @@
-import { c as createServerRpc, r as requireAdmin, A as AdminError, d as db, p as products, a as asc, e as eq } from "./admin.server-D0tbPMwO.mjs";
-import { S as SEED_CATALOG } from "./catalog-BfiH91C2.mjs";
-import { $ as createServerFn } from "./server.mjs";
-import { o as object, s as string, n as number, b as boolean } from "./schemas-CrY2pnAI.mjs";
+import { d as db, p as products, a as asc, e as eq, c as createServerRpc, r as requireAdmin, A as AdminError } from "./admin.server-viLczT-C.js";
+import { S as SEED_CATALOG } from "./catalog-BfiH91C2.js";
+import { $ as createServerFn } from "../server.js";
+import { o as object, s as string, n as number, b as boolean } from "./schemas-CrY2pnAI.js";
 import "node:crypto";
 import "node:async_hooks";
 import "node:stream";
@@ -17,6 +17,7 @@ function toProduct(row) {
     subcategory: row.subcategory,
     name: row.name,
     price: row.price,
+    discountPrice: row.discountPrice,
     imageData: row.imageData,
     platform: row.platform,
     region: row.region,
@@ -44,7 +45,7 @@ async function seedIfEmpty() {
 }
 async function listProducts() {
   await seedIfEmpty();
-  const rows = await db.select().from(products).orderBy(asc(products.position), asc(products.id));
+  const rows = await db.select().from(products).orderBy(asc(products.name));
   return rows.map(toProduct);
 }
 async function insertProduct(input) {
@@ -53,6 +54,7 @@ async function insertProduct(input) {
     subcategory: input.subcategory,
     name: input.name,
     price: input.price,
+    discountPrice: input.discountPrice,
     imageData: input.imageData,
     platform: input.platform,
     region: input.region,
@@ -68,6 +70,7 @@ async function saveProduct(id, input) {
     subcategory: input.subcategory,
     name: input.name,
     price: input.price,
+    discountPrice: input.discountPrice,
     imageData: input.imageData,
     platform: input.platform,
     region: input.region,
@@ -85,11 +88,15 @@ const productInput = object({
   subcategory: string().min(1).max(60),
   name: string().min(1).max(120),
   price: number().int().min(0).max(1e8),
+  discountPrice: number().int().min(0).max(1e8).nullable(),
   imageData: string().max(3e6).nullable(),
   platform: string().max(80).nullable(),
   region: string().max(80).nullable(),
   type: string().max(80).nullable(),
   available: boolean()
+}).refine((data) => data.discountPrice === null || data.discountPrice < data.price, {
+  message: "O preço com desconto tem de ser menor que o preço normal.",
+  path: ["discountPrice"]
 });
 const authed = object({
   token: string().min(1)
