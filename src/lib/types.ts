@@ -28,3 +28,19 @@ export interface ProductInput {
   type: string | null
   available: boolean
 }
+
+/** Depoimento de cliente mostrado no site. */
+export interface Testimonial {
+  id: number
+  name: string
+  text: string
+  rating: number
+  imageData: string | null
+}
+
+export interface TestimonialInput {
+  name: string
+  text: string
+  rating: number
+  imageData: string | null
+}

@@ -38,6 +38,18 @@ export const products = pgTable(
   (table) => [index('products_category_idx').on(table.category)],
 )
 
+/** Depoimentos de clientes mostrados na secção "O que dizem os clientes". */
+export const testimonials = pgTable('testimonials', {
+  id: serial().primaryKey(),
+  name: text().notNull(),
+  text: text().notNull(),
+  rating: integer().notNull().default(5),
+  imageData: text('image_data'),
+  position: integer().notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
 /** Configuração da loja (hash do PIN, contador de tentativas, etc.). */
 export const settings = pgTable('settings', {
   key: text().primaryKey(),

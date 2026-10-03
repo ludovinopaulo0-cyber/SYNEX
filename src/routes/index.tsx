@@ -22,6 +22,7 @@ import {
 import { AdminDialog } from '@/components/AdminDialog'
 import type { AdminDialogMode } from '@/components/AdminDialog'
 import { AdminProductForm } from '@/components/AdminProductForm'
+import { AdminTestimonialForm } from '@/components/AdminTestimonialForm'
 import { SupplierPanel } from '@/components/SupplierPanel'
 import { Logo, Wordmark } from '@/components/Logo'
 import { ProductCard } from '@/components/ProductCard'
@@ -30,10 +31,14 @@ import { formatKzParts } from '@/lib/format'
 import { BRAND, orderMessage, whatsappLink } from '@/lib/brand'
 import { useAdmin } from '@/lib/useAdmin'
 import { getProducts } from '@/server/catalog.functions'
-import type { Product } from '@/lib/types'
+import { getTestimonials } from '@/server/testimonials.functions'
+import type { Product, Testimonial } from '@/lib/types'
 
 export const Route = createFileRoute('/')({
-  loader: async () => ({ products: await getProducts() }),
+  loader: async () => ({
+    products: await getProducts(),
+    testimonials: await getTestimonials(),
+  }),
   component: Home,
 })
 
@@ -47,8 +52,11 @@ function fold(value: string): string {
 }
 
 function Home() {
-  const { products: initial } = Route.useLoaderData()
+  const { products: initial, testimonials: initialTestimonials } = Route.useLoaderData()
   const [products, setProducts] = useState<Array<Product>>(initial)
+  const [testimonials, setTestimonials] = useState<Array<Testimonial>>(initialTestimonials)
+  const [editingTestimonialId, setEditingTestimonialId] = useState<number | null>(null)
+  const [creatingTestimonial, setCreatingTestimonial] = useState(false)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
   const [subcategory, setSubcategory] = useState<string | null>(null)
@@ -171,6 +179,16 @@ function Home() {
         ? current.map((product) => (product.id === saved.id ? saved : product))
         : [...current, saved],
     )
+
+  const upsertTestimonial = (saved: Testimonial) => {
+    setTestimonials((current) =>
+      current.some((item) => item.id === saved.id)
+        ? current.map((item) => (item.id === saved.id ? saved : item))
+        : [...current, saved],
+    )
+    setEditingTestimonialId(null)
+    setCreatingTestimonial(false)
+  }
 
   const isAdmin = admin.token !== null
 
@@ -453,42 +471,81 @@ function Home() {
       {/* ---------------- Prova social ---------------- */}
       <section className="border-t border-hairline bg-ink-deep/60">
         <div className="mx-auto max-w-6xl px-5 py-14">
-          <h2 className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-paper">
-            O que dizem os clientes
-          </h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {[
-              {
-                name: 'Jérsson M.',
-                text: 'Pedi a PSN à noite e já estava a jogar 10 minutos depois. Super rápido.',
-              },
-              {
-                name: 'Ivânia S.',
-                text: 'Comprei Robux para o meu filho, o código veio certo e o atendimento foi muito simpático.',
-              },
-              {
-                name: 'Paulo K.',
-                text: 'Já fiz várias encomendas, nunca tive problema nenhum. Recomendo.',
-              },
-            ].map((item) => (
-              <div
-                key={item.name}
-                className="cut-panel border border-hairline bg-ink-raised/40 p-5"
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-paper">
+              O que dizem os clientes
+            </h2>
+            {isAdmin && !creatingTestimonial && (
+              <button
+                type="button"
+                onClick={() => setCreatingTestimonial(true)}
+                className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 font-display text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-muted transition-colors hover:border-lilac/60 hover:text-paper"
               >
-                <Quote className="h-4 w-4 text-violet/70" />
-                <p className="mt-3 text-xs leading-relaxed text-muted">“{item.text}”</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-paper">
-                    {item.name}
-                  </p>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-lilac text-lilac" />
-                    ))}
+                <Plus className="h-3 w-3" /> Adicionar
+              </button>
+            )}
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {creatingTestimonial && admin.token && (
+              <AdminTestimonialForm
+                testimonial={null}
+                token={admin.token}
+                onSaved={upsertTestimonial}
+                onCancel={() => setCreatingTestimonial(false)}
+              />
+            )}
+
+            {testimonials.map((item) =>
+              isAdmin && editingTestimonialId === item.id && admin.token ? (
+                <AdminTestimonialForm
+                  key={item.id}
+                  testimonial={item}
+                  token={admin.token}
+                  onSaved={upsertTestimonial}
+                  onCancel={() => setEditingTestimonialId(null)}
+                  onDeleted={(id) => {
+                    setTestimonials((current) => current.filter((t) => t.id !== id))
+                    setEditingTestimonialId(null)
+                  }}
+                />
+              ) : (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => isAdmin && setEditingTestimonialId(item.id)}
+                  disabled={!isAdmin}
+                  className={`cut-panel border border-hairline bg-ink-raised/40 p-5 text-left ${
+                    isAdmin ? 'cursor-pointer transition-colors hover:border-lilac/50' : ''
+                  }`}
+                >
+                  {item.imageData ? (
+                    <img
+                      src={item.imageData}
+                      alt={item.name}
+                      className="h-9 w-9 rounded-full object-cover"
+                    />
+                  ) : (
+                    <Quote className="h-4 w-4 text-violet/70" />
+                  )}
+                  <p className="mt-3 text-xs leading-relaxed text-muted">“{item.text}”</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-paper">
+                      {item.name}
+                    </p>
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: item.rating }).map((_, i) => (
+                        <Star key={i} className="h-3 w-3 fill-lilac text-lilac" />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </button>
+              ),
+            )}
+
+            {testimonials.length === 0 && !creatingTestimonial && (
+              <p className="text-xs text-muted">Ainda sem depoimentos.</p>
+            )}
           </div>
         </div>
       </section>
